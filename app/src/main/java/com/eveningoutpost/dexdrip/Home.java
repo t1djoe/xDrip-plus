@@ -71,6 +71,7 @@ import com.eveningoutpost.dexdrip.UtilityModels.CollectionServiceStarter;
 import com.eveningoutpost.dexdrip.UtilityModels.Intents;
 import com.eveningoutpost.dexdrip.UtilityModels.JamorhamShowcaseDrawer;
 import com.eveningoutpost.dexdrip.UtilityModels.Notifications;
+import com.eveningoutpost.dexdrip.UtilityModels.PersistentStore;
 import com.eveningoutpost.dexdrip.UtilityModels.SendFeedBack;
 import com.eveningoutpost.dexdrip.UtilityModels.ShotStateStore;
 import com.eveningoutpost.dexdrip.UtilityModels.UndoRedo;
@@ -175,6 +176,7 @@ public class Home extends ActivityWithMenu {
     private static final int SHOWCASE_NOTE_LONG = 6;
     private static final int SHOWCASE_VARIANT = 7;
     public static final int SHOWCASE_STATISTICS = 8;
+    private static final int SHOWCASE_G5FIRMWARE = 9;
     private static double last_speech_time = 0;
     private PreviewLineChartView previewChart;
     private Button stepsButton;
@@ -287,7 +289,12 @@ public class Home extends ActivityWithMenu {
                     intent.setAction(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
                     intent.setData(Uri.parse("package:" + packageName));
                     startActivity(intent);
-                    JoH.static_toast_long("Select YES for best performance!");
+                    if (PersistentStore.incrementLong("asked_battery_optimization") < 5) {
+                        JoH.static_toast_long("Select YES for best performance!");
+                    } else {
+                        JoH.static_toast_long("This app needs battery optimization whitelisting or it will not work well. Please reset app preferences");
+                    }
+
                 } catch (ActivityNotFoundException e) {
                     final String msg = "Device does not appear to support battery optimization whitelisting!";
                     JoH.static_toast_short(msg);
@@ -458,7 +465,6 @@ public class Home extends ActivityWithMenu {
         processIncomingBundle(bundle);
 
         checkBadSettings();
-
         // lower priority
         PlusSyncService.startSyncService(getApplicationContext(), "HomeOnCreate");
         ParakeetHelper.notifyOnNextCheckin(false);
@@ -1320,7 +1326,7 @@ public class Home extends ActivityWithMenu {
         super.onResume();
         checkEula();
         set_is_follower();
-        
+
         if(BgGraphBuilder.isXLargeTablet(getApplicationContext())) {
             this.currentBgValueText.setTextSize(100);
             this.notificationText.setTextSize(40);
@@ -1562,7 +1568,8 @@ public class Home extends ActivityWithMenu {
 
     private void updateHealthInfo(String caller) {
         final PebbleMovement pm = PebbleMovement.last();
-        if (pm != null) {
+        final boolean use_pebble_health = prefs.getBoolean("use_pebble_health", true);
+        if ((use_pebble_health) && (pm != null)) {
             stepsButton.setText(Integer.toString(pm.metric));
             stepsButton.setVisibility(View.VISIBLE);
             stepsButton.setAlpha(getPreferencesBoolean("show_pebble_movement_line", true) ? 1.0f : 0.3f);
@@ -1571,7 +1578,7 @@ public class Home extends ActivityWithMenu {
         }
 
         final HeartRate hr = HeartRate.last();
-        if (hr != null) {
+        if ((use_pebble_health) && (hr != null)) {
             bpmButton.setText(Integer.toString(hr.bpm));
             bpmButton.setVisibility(View.VISIBLE);
         } else {
@@ -1724,7 +1731,7 @@ public class Home extends ActivityWithMenu {
             btnVehicleMode.setVisibility(View.INVISIBLE);
         }
 
-
+        if (isG5Share) showcasemenu(SHOWCASE_G5FIRMWARE); // nov 2016 firmware warning
         //showcasemenu(1); // 3 dot menu
 
     }
@@ -1891,7 +1898,18 @@ public class Home extends ActivityWithMenu {
 
         final int sensor_age = prefs.getInt("nfc_sensor_age", 0);
         if ((sensor_age > 0) && (DexCollectionType.hasLibre())) {
-            sensorAge.setText("Age: " + JoH.qs(((double) sensor_age) / 1440, 1) + "d"+(Home.getPreferencesBooleanDefaultFalse("nfc_age_problem") ? " \u26A0\u26A0\u26A0" : ""));
+            final String age_problem = (Home.getPreferencesBooleanDefaultFalse("nfc_age_problem") ? " \u26A0\u26A0\u26A0" : "");
+            if (prefs.getBoolean("nfc_show_age", true)) {
+                sensorAge.setText("Age: " + JoH.qs(((double) sensor_age) / 1440, 1) + "d" + age_problem);
+            } else {
+                try {
+                    final double expires = JoH.tolerantParseDouble(Home.getPreferencesStringWithDefault("nfc_expiry_days", "14.5")) - ((double) sensor_age) / 1440;
+                    sensorAge.setText(((expires >= 0) ? ("Expires: " + JoH.qs(expires, 1) + "d") : "EXPIRED! ") + age_problem);
+                } catch (Exception e) {
+                    Log.e(TAG, "expiry calculation: " + e);
+                    sensorAge.setText("Expires: " + "???");
+                }
+            }
             sensorAge.setVisibility(View.VISIBLE);
             if (sensor_age < 1440) {
                 sensorAge.setTextColor(Color.YELLOW);
@@ -2257,6 +2275,14 @@ public class Home extends ActivityWithMenu {
 
                 switch (option) {
 
+                    case SHOWCASE_G5FIRMWARE:
+                        target= new ViewTarget(R.id.btnNote, this); // dummy
+                        size1=0;
+                        size2=0;
+                        title="G5 Firmware Warning";
+                        message="Transmitters containing updated firmware which started shipping around 20th Nov 2016 appear to be currently incompatible with xDrip+\n\nWork will continue to try to resolve this issue but at the time of writing there is not yet a solution.  For the latest updates you can select the Alpha or Nightly update channel.";
+                        break;
+
                     case SHOWCASE_VARIANT:
                         target= new ViewTarget(R.id.btnNote, this); // dummy
                         size1=0;
@@ -2446,7 +2472,6 @@ public class Home extends ActivityWithMenu {
     }
 
     public void doBackFillBroadcast(MenuItem myitem) {
-        DisplayQRCode.mContext = getApplicationContext();
         GcmActivity.syncBGTable2();
         toast("Starting sync to other devices");
     }

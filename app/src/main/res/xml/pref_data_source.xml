@@ -23,6 +23,17 @@
                 android:summary="Allow sensors to be scanned when app is open. Historic data will be back-filled. Highly experiemental! Beware this can maybe break a sensor. Test phone compatibility with an almost expired sensor first. You have been warned!"
                 android:title="Use NFC feature" />
             <CheckBoxPreference
+                android:defaultValue="true"
+                android:key="nfc_show_age"
+                android:summaryOff="Show the sensor expiry time based on 14.5 days"
+                android:summaryOn="Show the sensor age on the main screen"
+                android:title="Sensor Age or Expiry" />
+            <EditTextPreference
+                android:defaultValue="14.5"
+                android:inputType="numberDecimal"
+                android:key="nfc_expiry_days"
+                android:title="Change Sensor Total Days" />
+            <CheckBoxPreference
                 android:defaultValue="false"
                 android:dependency="use_nfc_scan"
                 android:key="nfc_scan_homescreen"
@@ -83,6 +94,12 @@
             android:summary="@string/shows_a_persistent_notification"
             android:title="@string/run_collector_in_foreground" />
 
+
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="g5_non_raw_method"
+            android:summary="Newer G5 firmware doesn't work with the method previously used. Experimental mode to try to resolve this."
+            android:title="TEST G5 Post Nov 2016 mode" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:key="run_ble_scan_constantly"

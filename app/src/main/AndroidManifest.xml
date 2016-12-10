@@ -50,7 +50,7 @@
             android:value="41" />
         <meta-data
             android:name="AA_MODELS"
-            android:value="com.eveningoutpost.dexdrip.Models.ActiveBgAlert,com.eveningoutpost.dexdrip.Models.ActiveBluetoothDevice,com.eveningoutpost.dexdrip.Models.AlertType,com.eveningoutpost.dexdrip.Models.BgReading,com.eveningoutpost.dexdrip.Models.BgReading,com.eveningoutpost.dexdrip.Models.Calibration,com.eveningoutpost.dexdrip.Models.Calibration,com.eveningoutpost.dexdrip.Models.CalibrationRequest,com.eveningoutpost.dexdrip.Models.Sensor,com.eveningoutpost.dexdrip.Models.TransmitterData,com.eveningoutpost.dexdrip.Models.Treatments,com.eveningoutpost.dexdrip.Models.UserError,com.eveningoutpost.dexdrip.Models.UserNotification,com.eveningoutpost.dexdrip.ShareModels.Models,com.eveningoutpost.dexdrip.UtilityModels.BgSendQueue,com.eveningoutpost.dexdrip.UtilityModels.CalibrationSendQueue,com.eveningoutpost.dexdrip.UtilityModels.SensorSendQueue,com.eveningoutpost.dexdrip.Models.HeartRate,com.eveningoutpost.dexdrip.Models.PebbleMovement"/>
+            android:value="com.eveningoutpost.dexdrip.Models.ActiveBgAlert,com.eveningoutpost.dexdrip.Models.ActiveBluetoothDevice,com.eveningoutpost.dexdrip.Models.AlertType,com.eveningoutpost.dexdrip.Models.BgReading,com.eveningoutpost.dexdrip.Models.BgReading,com.eveningoutpost.dexdrip.Models.Calibration,com.eveningoutpost.dexdrip.Models.Calibration,com.eveningoutpost.dexdrip.Models.CalibrationRequest,com.eveningoutpost.dexdrip.Models.Sensor,com.eveningoutpost.dexdrip.Models.TransmitterData,com.eveningoutpost.dexdrip.Models.Treatments,com.eveningoutpost.dexdrip.Models.UserError,com.eveningoutpost.dexdrip.Models.UserNotification,com.eveningoutpost.dexdrip.ShareModels.Models,com.eveningoutpost.dexdrip.UtilityModels.BgSendQueue,com.eveningoutpost.dexdrip.UtilityModels.CalibrationSendQueue,com.eveningoutpost.dexdrip.UtilityModels.SensorSendQueue,com.eveningoutpost.dexdrip.Models.HeartRate,com.eveningoutpost.dexdrip.Models.PebbleMovement,com.eveningoutpost.dexdrip.UtilityModels.UploaderQueue"/>
 
         <provider
             android:name="com.activeandroid.content.ContentProvider"
@@ -174,13 +174,13 @@
         <service
             android:name=".RegistrationIntentService"
             android:exported="false" />
-        <service
+       <!-- <service
             android:name=".MyDriveEventService"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.android.gms.drive.events.HANDLE_EVENT" />
             </intent-filter>
-        </service>
+        </service>-->
         <service
             android:name=".Services.SyncService"
             android:enabled="true"
@@ -377,6 +377,11 @@
         <receiver android:name=".LibreAlarmReceiver">
             <intent-filter>
                 <action android:name="com.eveningoutpost.dexdrip.FROM_LIBRE_ALARM" />
+            </intent-filter>
+        </receiver>
+        <receiver android:name=".NSEmulatorReceiver">
+            <intent-filter>
+                <action android:name="com.eveningoutpost.dexdrip.NS_EMULATOR" />
             </intent-filter>
         </receiver>
         <receiver

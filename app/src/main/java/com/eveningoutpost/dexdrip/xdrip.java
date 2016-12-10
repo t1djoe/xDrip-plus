@@ -8,6 +8,7 @@ import android.util.Log;
 
 import com.crashlytics.android.Crashlytics;
 import com.crashlytics.android.core.CrashlyticsCore;
+import com.bugfender.sdk.Bugfender;
 import com.eveningoutpost.dexdrip.Models.AlertType;
 import com.eveningoutpost.dexdrip.Models.JoH;
 import com.eveningoutpost.dexdrip.Services.ActivityRecognizedService;
@@ -30,8 +31,10 @@ public class xdrip extends Application {
     private static final String TAG = "xdrip.java";
     private static Context context;
     private static boolean fabricInited = false;
+    private static boolean bfInited = false;
     private static Locale LOCALE;
     public static PlusAsyncExecutor executor;
+    public static boolean useBF = false;
 
 
     @Override
@@ -41,6 +44,7 @@ public class xdrip extends Application {
         try {
             if (PreferenceManager.getDefaultSharedPreferences(xdrip.context).getBoolean("enable_crashlytics", true)) {
                 initCrashlytics(this);
+                initBF();
             }
         } catch (Exception e) {
             Log.e(TAG, e.toString());
@@ -82,6 +86,31 @@ public class xdrip extends Application {
             fabricInited = true;
         }
     }
+
+    public synchronized static void initBF() {
+        try {
+            if (PreferenceManager.getDefaultSharedPreferences(xdrip.context).getBoolean("enable_bugfender", false)) {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        String app_id = PreferenceManager.getDefaultSharedPreferences(xdrip.context).getString("bugfender_appid", "").trim();
+                        if (!useBF && (app_id.length() > 10)) {
+                            if (!bfInited) {
+                                Bugfender.init(xdrip.context, app_id, BuildConfig.DEBUG);
+                                bfInited = true;
+                            }
+                            useBF = true;
+                        }
+                    }
+                }.start();
+            } else {
+                useBF = false;
+            }
+        } catch (Exception e) {
+            //
+        }
+    }
+
 
     public static Context getAppContext() {
         return xdrip.context;

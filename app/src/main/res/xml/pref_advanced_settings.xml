@@ -18,15 +18,21 @@
             <CheckBoxPreference
                 android:defaultValue="false"
                 android:dependency="wear_sync"
-                android:key="wear_connectG5"
-                android:summary="@string/pref_summary_wear_connectG5"
-                android:title="@string/pref_wear_connectG5"/>
+                android:key="enable_wearG5"
+                android:summary="@string/pref_summary_enable_wearG5"
+                android:title="@string/pref_enable_wearG5"/>
             <CheckBoxPreference
                 android:defaultValue="false"
-                android:dependency="wear_connectG5"
-                android:key="use_wear_connectG5"
-                android:summary="@string/pref_summary_use_wear_connectG5"
-                android:title="@string/pref_use_wear_connectG5"/>
+                android:dependency="enable_wearG5"
+                android:key="force_wearG5"
+                android:summary="@string/pref_summary_force_wearG5"
+                android:title="@string/pref_force_wearG5"/>
+            <EditTextPreference
+                android:defaultValue=""
+                android:dependency="force_wearG5"
+                android:key="node_wearG5"
+                android:summary="@string/pref_summary_node_wearG5"
+                android:title="@string/pref_node_wearG5"/>
         </PreferenceCategory>
         <PreferenceCategory
             android:key="pebble_integration"
@@ -128,6 +134,13 @@
                 android:key="pebble_special_text"
                 android:summary="@string/message_to_display_when_bgl_hits"
                 android:title="@string/text_to_display_when_hitting_special_value" />
+            <SwitchPreference
+                android:defaultValue="true"
+                android:key="use_pebble_health"
+                android:summary="Collect and display Step counter and Heart rate when available"
+                android:switchTextOff="@string/short_off_text_for_switches"
+                android:switchTextOn="@string/short_on_text_for_switches"
+                android:title="Use Pebble Health Data" />
         </PreferenceCategory>
         <PreferenceCategory
             android:key="pebble_installers"
@@ -241,6 +254,11 @@
                 android:title="Bluetooth Watchdog" />
             <CheckBoxPreference
                 android:defaultValue="true"
+                android:key="g5_bluetooth_watchdog"
+                android:summary="Reset Bluetooth by turning it off and on as a way to keep the G5 data source working. Without this the G5 collector may fail."
+                android:title="G5 Bluetooth Watchdog" />
+            <CheckBoxPreference
+                android:defaultValue="true"
                 android:key="close_gatt_on_ble_disconnect"
                 android:summary="If the bluetooth watchdog activates often then you can try unchecking this option to see if it helps"
                 android:title="@string/close_gatt_on_ble_disconnect" />
@@ -281,6 +299,18 @@
                 android:key="infrequent_calibration"
                 android:summary="If needed, use calibrations from longer ago, eg if calibrations are supplied infrequently."
                 android:title="Infrequent Calibration" />
+        <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+            android:key="xdrip_logging_adv_settings"
+            android:title="Extra Logging Settings">
+            <CheckBoxPreference
+                android:defaultValue="false"
+                android:key="enable_bugfender"
+                android:summary="Send Event and Error List Logs automatically to the developer"
+                android:title="Enable Remote Logging" />
+            <EditTextPreference
+                android:defaultValue=""
+                android:key="bugfender_appid"
+                android:title="Set Logging AppID"/>
             <CheckBoxPreference
                 android:defaultValue="false"
                 android:dependency="engineering_mode"
@@ -294,6 +324,7 @@
                 android:inputType="textUri"
                 android:key="extra_tags_for_logging"
                 android:title="@string/extra_tags_for_logging"/>
+            </PreferenceScreen>
             <CheckBoxPreference
                 android:defaultValue="false"
                 android:key="show_data_tables"
